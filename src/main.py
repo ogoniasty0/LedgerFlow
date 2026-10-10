@@ -1,3 +1,5 @@
+from validators import  get_int_input, get_non_empty_string
+from services import display_budget
 def handle_menu_choice(choice: str) -> bool:
     match choice.strip():
         case "1":
@@ -28,7 +30,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = input("Wybierz opcję [1-4]: ")
+        user_choice = input("Wybierz opcję [1-4]: ",)
         running = handle_menu_choice(user_choice)
 
 if __name__ == "__main__":
