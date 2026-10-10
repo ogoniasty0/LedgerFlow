@@ -1,5 +1,5 @@
 from validators import  get_int_input, get_non_empty_string
-from services import display_budget, add_new_transaction
+from services import display_budget, add_new_transaction, filter_transactions
 from data import TRANSACTIONS
 def handle_menu_choice(choice: str) -> bool:
     match choice.strip():
@@ -23,7 +23,10 @@ def handle_menu_choice(choice: str) -> bool:
             type = get_non_empty_string("Podaj typ transakcji (przychód/wydatek): ")
             add_new_transaction(TRANSACTIONS , category, amount, type)
         case "3":
-            show_limits()
+            print("\n--- FILTROWANIE TRANSAKCJI ---")
+            category = get_non_empty_string("Podaj kategorię do wyszukania (np. Zakupy): ")
+            filter_transactions(TRANSACTIONS, category)
+            return True
         case "4" | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
 
@@ -38,7 +41,7 @@ def print_menu():
     print("=" * 40)
     print("1. Wyświetl rejstr transakcji/budżet")
     print("2. Dodaj nową transakcję")
-    print("3. Cele i limity wydatków")
+    print("3.Filtruj transakcje.")
     print("4. Wyjście z programu")
     print("-" * 40)
 
