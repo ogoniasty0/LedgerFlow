@@ -5,4 +5,13 @@ def display_budget(TRANSACTIONS):
     for transaction in TRANSACTIONS:
         print(f"| {transaction['id']:<3} | {transaction['category']:<20} | {transaction['amount']:>10.2f} | {transaction['type']:<10}")
     print("-" * 70)
-  
+def add_new_transaction(TRANSACTIONS, category, amount, type):
+    new_id = len(TRANSACTIONS) + 1
+    new_transaction = {
+        "id": new_id,
+        "category": category,
+        "amount": amount,
+        "type": type
+    }
+    TRANSACTIONS.append(new_transaction)
+    print(f"Nowa transakcja o id {new_id} została dodana.")

@@ -1,5 +1,5 @@
 from validators import  get_int_input, get_non_empty_string
-from services import display_budget
+from services import display_budget, add_new_transaction
 from data import TRANSACTIONS
 def handle_menu_choice(choice: str) -> bool:
     match choice.strip():
@@ -7,7 +7,21 @@ def handle_menu_choice(choice: str) -> bool:
             display_budget(TRANSACTIONS)
             return False
         case "2":
-            add_new_transaction()
+            print("\n---Dodawanie nowej transakcji ---")
+            category = get_non_empty_string("Podaj kategorię: ")
+
+            while True:
+                try:
+                    amount = float(get_non_empty_string("Podaj kwotę: "))
+                    if amount <= 0:
+                        print("Błąd: Kwota musi być większa od zera. Spróbuj ponownie.")
+                        continue
+                    break
+                except ValueError:
+                    print("Błąd: Nieprawidłowa kwota. Wprowadź liczbę.")
+
+            type = get_non_empty_string("Podaj typ transakcji (przychód/wydatek): ")
+            add_new_transaction(TRANSACTIONS , category, amount, type)
         case "3":
             show_limits()
         case "4" | "q" | "exit":
