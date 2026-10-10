@@ -14,10 +14,15 @@ def add_new_transaction(TRANSACTIONS, category, amount, type):
         "type": type
     }
     TRANSACTIONS.append(new_transaction)
-    print(f"Nowa transakcja o id {new_id} została dodana.")
-    
+    print(f"Nowa transakcja o id {new_id} została dodana.")    
 def filter_transactions(records, target_category):
-    filtered = [item for item in records if item['category'].lower() == target_category.lower()]
+    filtered = []
+
+    for item in records:
+
+        if item['category'].lower() == target_category.lower():
+
+            filtered.append(item)
 
     print(f"\n--- WYNIKI DLA KATEGORII: '{target_category}' ---")
 
