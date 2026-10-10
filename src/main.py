@@ -1,16 +1,18 @@
 from validators import  get_int_input, get_non_empty_string
 from services import display_budget
+from data import TRANSACTIONS
 def handle_menu_choice(choice: str) -> bool:
     match choice.strip():
         case "1":
-            display_budget()
+            display_budget(TRANSACTIONS)
+            return False
         case "2":
             add_new_transaction()
         case "3":
             show_limits()
         case "4" | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
-# Zakończenie pętli głównej
+
             return False
         case _:
             print("Błąd: Nieznana opcja. Wybierz wartość od 1 do 4.")
