@@ -8,7 +8,6 @@ def handle_menu_choice(choice: str) -> bool:
             show_limits()
         case "4" | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
-# Zakończenie pętli głównej
             return False
         case _:
             print("Błąd: Nieznana opcja. Wybierz wartość od 1 do 4.")
