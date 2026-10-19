@@ -5,7 +5,7 @@ def handle_menu_choice(choice: str) -> bool:
     match choice.strip():
         case "1":
             display_budget(TRANSACTIONS)
-            return False
+            return True
         case "2":
             print("\n---Dodawanie nowej transakcji ---")
             category = get_non_empty_string("Podaj kategorię: ")
@@ -21,7 +21,7 @@ def handle_menu_choice(choice: str) -> bool:
                     print("Błąd: Nieprawidłowa kwota. Wprowadź liczbę.")
 
             type = get_non_empty_string("Podaj typ transakcji (przychód/wydatek): ")
-            add_new_transaction(TRANSACTIONS , category, amount, type)
+            add_new_transaction(TRANSACTIONS , category.capitalize(), amount, type)
         case "3":
             print("\n--- FILTROWANIE TRANSAKCJI ---")
             category = get_non_empty_string("Podaj kategorię do wyszukania (np. Zakupy): ")
@@ -31,6 +31,9 @@ def handle_menu_choice(choice: str) -> bool:
             print("Zamykanie programu. Do widzenia!")
 
             return False
+        case "5":
+            tekst = input("Podaj tekst: ")
+            print("\n" + tekst)
         case _:
             print("Błąd: Nieznana opcja. Wybierz wartość od 1 do 4.")
     return True
@@ -41,8 +44,9 @@ def print_menu():
     print("=" * 40)
     print("1. Wyświetl rejstr transakcji/budżet")
     print("2. Dodaj nową transakcję")
-    print("3.Filtruj transakcje.")
+    print("3. Filtruj transakcje.")
     print("4. Wyjście z programu")
+    print("5. Podaj tekst który zostanie wyświetlony")
     print("-" * 40)
 
 def main():
