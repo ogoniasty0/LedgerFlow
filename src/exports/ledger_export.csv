@@ -1,0 +1,4 @@
+id,category,amount,type
+1,Zakupy,256.0,wydatek
+2,Wypłata,5000.0,dochód
+3,zakupy,300.0,wydatek

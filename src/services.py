@@ -1,3 +1,5 @@
+from storage import save_transactions
+
 def display_budget(TRANSACTIONS):
     print("\n" + "=" * 70)
     print(f"| {'id':<3} | {'Kategoria':<20} | {'Kwota':<10} | {'Typ':<10}")
@@ -14,6 +16,7 @@ def add_new_transaction(TRANSACTIONS, category, amount, type):
         "type": type
     }
     TRANSACTIONS.append(new_transaction)
+    save_transactions(TRANSACTIONS)
     print(f"Nowa transakcja o id {new_id} została dodana.")    
 def filter_transactions(records, target_category):   
     filtered = []
