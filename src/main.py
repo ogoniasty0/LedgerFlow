@@ -40,6 +40,9 @@ def handle_menu_choice(choice: str) -> bool:
         case "5" | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False
+        case "5":
+            tekst = input("Podaj tekst: ")
+            print("\n" + tekst)
         case _:
             print("Błąd: Nieznana opcja. Wybierz wartość od 1 do 5.")
             return True
