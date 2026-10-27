@@ -28,5 +28,11 @@
         "category": "Zakupy",
         "amount": 222.0,
         "type": "wydatek"
+    },
+    {
+        "id": 6,
+        "category": "Rachunki",
+        "amount": 455.0,
+        "type": "wydatek"
     }
 ]

@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "category": "Zakupy",
+        "amount": 256.0,
+        "type": "wydatek"
+    },
+    {
+        "id": 2,
+        "category": "Wypłata",
+        "amount": 5000.0,
+        "type": "dochód"
+    },
+    {
+        "id": 3,
+        "category": "zakupy",
+        "amount": 300.0,
+        "type": "wydatek"
+    },
+    {
+        "id": 4,
+        "category": "Rozrywka",
+        "amount": 300.0,
+        "type": "wydatek"
+    },
+    {
+        "id": 5,
+        "category": "Zakupy",
+        "amount": 222.0,
+        "type": "wydatek"
+    }
+]
