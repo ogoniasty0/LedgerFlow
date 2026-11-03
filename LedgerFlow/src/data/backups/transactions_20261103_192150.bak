@@ -1,0 +1,18 @@
+{
+    "account_name": "Główne Konto Domowe",
+    "initial_balance": 1000.0,
+    "transactions": [
+        {
+            "tx_id": 1,
+            "category": "Zakupy",
+            "amount_pln": 256.0,
+            "tx_type": "WYDATEK"
+        },
+        {
+            "tx_id": 2,
+            "category": "Wypłata",
+            "amount_pln": 5000.0,
+            "tx_type": "PRZYCHOD"
+        }
+    ]
+}
