@@ -1,0 +1,4 @@
+tx_id,category,amount_pln,tx_type
+1,Zakupy,256.0,WYDATEK
+2,Wypłata,5000.0,PRZYCHOD
+3,Rachunki,640.0,WYDATEK
