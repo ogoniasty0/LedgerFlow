@@ -1,60 +1,57 @@
 from validators import get_non_empty_string
-from services import display_budget, add_new_transaction, filter_transactions
-from storage import load_account, export_to_csv
+from services import display_ledger, add_expense, add_income
+from storage import load_manager, export_to_csv
 
-ACCOUNT = load_account()
+MANAGER = load_manager()
 
 def handle_menu_choice(choice: str) -> bool:
     match choice.strip():
         case "1":
-            display_budget(ACCOUNT)
+            display_ledger(MANAGER)
             return True
         case "2":
-            print("\n--- Dodawanie nowej transakcji ---")
+            print("\n--- Dodawanie Wydatku ---")
             category = get_non_empty_string("Podaj kategorię: ")
-
-            while True:
-                try:
-                    amount = float(get_non_empty_string("Podaj kwotę: "))
-                    break
-                except ValueError:
-                    print("Błąd: Nieprawidłowa kwota. Wprowadź liczbę.")
-
-            tx_type = get_non_empty_string("Podaj typ transakcji (PRZYCHOD / WYDATEK): ")
-
+            amount = float(get_non_empty_string("Podaj kwotę PLN: "))
+            fee = float(get_non_empty_string("Podaj prowizję operatora PLN [0 jeśli brak]: "))
             try:
-                add_new_transaction(ACCOUNT, category, amount, tx_type)
+                add_expense(MANAGER, category, amount, fee)
             except (ValueError, TypeError) as e:
                 print(f"\n[BŁĄD BIZNESOWY] {e}")
-
             return True
         case "3":
-            print("\n--- FILTROWANIE TRANSAKCJI ---")
-            category = get_non_empty_string("Podaj kategorię do wyszukania: ")
-            filter_transactions(ACCOUNT, category)
+            print("\n--- Dodawanie Przychodu ---")
+            category = get_non_empty_string("Podaj kategorię: ")
+            amount = float(get_non_empty_string("Podaj kwotę PLN: "))
+            source = get_non_empty_string("Podaj źródło (np. Etat, Premia): ")
+            tax = float(get_non_empty_string("Podaj podatek u źródła % [0-100]: "))
+            try:
+                add_income(MANAGER, category, amount, source, tax)
+            except (ValueError, TypeError) as e:
+                print(f"\n[BŁĄD BIZNESOWY] {e}")
             return True
         case "4":
             print("\n--- EKSPORT DO CSV ---")
-            rows = export_to_csv(ACCOUNT)
-            print(f"Sukces: Wyeksportowano {rows} transakcji z konta do pliku CSV.")
+            count = export_to_csv(MANAGER)
+            print(f"Wyeksportowano {count} wierszy do pliku exports/ledger_export.csv.")
             return True
         case "5" | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False
         case _:
-            print("Błąd: Nieznana opcja. Wybierz wartość od 1 do 5.")
+            print("Nieznana opcja. Wybierz 1-5.")
             return True
 
 def print_menu():
     print("\n" + "=" * 40)
-    print(" ASYSTENT BUDŻETU DOMOWEGO (OOP) ")
+    print(" ASYSTENT BUDŻETU DOMOWEGO")
     print("=" * 40)
-    print(f" Aktualne Saldo: {ACCOUNT.current_balance():.2f} PLN")
+    print(f" Dostępne Saldo: {MANAGER.calculate_total_balance():.2f} PLN")
     print("-" * 40)
-    print("1. Wyświetl rejestr transakcji/budżet")
-    print("2. Dodaj nową transakcję")
-    print("3. Filtruj transakcje")
-    print("4. Eksportuj transakcje do CSV")
+    print("1. Wyświetl rejestr i saldo portfela")
+    print("2. Dodaj Wydatek")
+    print("3. Dodaj Przychód")
+    print("4. Eksportuj rejestr do CSV")
     print("5. Wyjście z programu")
     print("-" * 40)
 
