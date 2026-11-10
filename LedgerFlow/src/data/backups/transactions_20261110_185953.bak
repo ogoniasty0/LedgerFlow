@@ -1,0 +1,21 @@
+{
+    "account_name": "Główne Konto Domowe",
+    "initial_balance": 500.0,
+    "transactions": [
+        {
+            "tx_id": 1,
+            "category": "Zakupy Spozywcze",
+            "amount_pln": 150.0,
+            "type": "expense",
+            "operator_fee": 2.5
+        },
+        {
+            "tx_id": 2,
+            "category": "Wyplata",
+            "amount_pln": 4000.0,
+            "type": "income",
+            "source": "Etat",
+            "tax_pct": 12.0
+        }
+    ]
+}

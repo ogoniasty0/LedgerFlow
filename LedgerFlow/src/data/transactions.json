@@ -1,24 +1,28 @@
 {
     "account_name": "Główne Konto Domowe",
-    "initial_balance": 1000.0,
+    "initial_balance": 500.0,
     "transactions": [
         {
             "tx_id": 1,
-            "category": "Zakupy",
-            "amount_pln": 256.0,
-            "tx_type": "WYDATEK"
+            "category": "Zakupy Spozywcze",
+            "amount_pln": 150.0,
+            "type": "expense",
+            "operator_fee": 2.5
         },
         {
             "tx_id": 2,
-            "category": "Wypłata",
-            "amount_pln": 5000.0,
-            "tx_type": "PRZYCHOD"
+            "category": "Wyplata",
+            "amount_pln": 4000.0,
+            "type": "income",
+            "source": "Etat",
+            "tax_pct": 12.0
         },
         {
             "tx_id": 3,
-            "category": "Rachunki",
-            "amount_pln": 640.0,
-            "tx_type": "WYDATEK"
+            "category": "zakupy",
+            "amount_pln": 24.0,
+            "type": "expense",
+            "operator_fee": 0.0
         }
     ]
 }

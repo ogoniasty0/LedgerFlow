@@ -6,7 +6,8 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from models import Account, Transaction
+from manager import LedgerManager
+from models import ExpenseTransaction, IncomeTransaction
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -17,97 +18,81 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
-ACCOUNT_FILE = DATA_DIR / "transactions.json"
+LEDGER_FILE = DATA_DIR / "transactions.json"
 
-def get_seed_account() -> Account:
-    tx1 = Transaction(1, "Zakupy", 256.0, "WYDATEK")
-    tx2 = Transaction(2, "Wypłata", 5000.0, "PRZYCHOD")
-    return Account(account_name="Główne Konto Domowe", initial_balance=1000.0, transactions=[tx1, tx2])
+def get_seed_manager() -> LedgerManager:
+    tx1 = ExpenseTransaction(1, "Zakupy Spozywcze", 150.0, operator_fee=2.50)
+    tx2 = IncomeTransaction(2, "Wyplata", 4000.0, source="Etat", tax_pct=12.0)
+    return LedgerManager("Główne Konto Domowe", initial_balance=500.0, transactions=[tx1, tx2])
 
 def create_backup(max_backups: int = 3) -> Path | None:
-    if not ACCOUNT_FILE.exists():
+    if not LEDGER_FILE.exists():
         return None
-    
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_path = BACKUP_DIR / f"transactions_{stamp}.bak"
-    shutil.copy2(ACCOUNT_FILE, backup_path)
+    shutil.copy2(LEDGER_FILE, backup_path)
     
     existing_backups = sorted(BACKUP_DIR.glob("transactions_*.bak"))
     while len(existing_backups) > max_backups:
-        oldest_backup = existing_backups.pop(0)
-        oldest_backup.unlink(missing_ok=True)
-        
+        oldest = existing_backups.pop(0)
+        oldest.unlink(missing_ok=True)
     return backup_path
 
-def save_account(account: Account) -> None:
+def save_manager(manager: LedgerManager) -> None:
     create_backup(max_backups=3)
-    
-    with tempfile.NamedTemporaryFile(
-        mode="w",
-        dir=DATA_DIR,
-        prefix="trans_tmp_",
-        suffix=".json",
-        delete=False,
-        encoding="utf-8"
-    ) as tmp:
-        json.dump(account.to_dict(), tmp, indent=4, ensure_ascii=False)
+    with tempfile.NamedTemporaryFile(mode="w", dir=DATA_DIR, prefix="trans_tmp_", suffix=".json", delete=False, encoding="utf-8") as tmp:
+        json.dump(manager.to_dict(), tmp, indent=4, ensure_ascii=False)
         tmp.flush()
         os.fsync(tmp.fileno())
         temp_path = Path(tmp.name)
-        
-    os.replace(temp_path, ACCOUNT_FILE)
+    os.replace(temp_path, LEDGER_FILE)
 
-def load_account() -> Account:
+def load_manager() -> LedgerManager:
     try:
-        with open(ACCOUNT_FILE, mode="r", encoding="utf-8") as f:
+        with open(LEDGER_FILE, mode="r", encoding="utf-8") as f:
             raw_data = json.load(f)
-            if isinstance(raw_data, list):
-                txs = [Transaction.from_dict(item) for item in raw_data]
-                acc = Account("Główne Konto Domowe", initial_balance=1000.0, transactions=txs)
-                save_account(acc)
-                return acc
-            return Account.from_dict(raw_data)
-            
+            return LedgerManager.from_dict(raw_data)
     except FileNotFoundError:
-        seed_acc = get_seed_account()
-        save_account(seed_acc)
-        return seed_acc
-        
-    except (json.JSONDecodeError, KeyError, ValueError):
+        seed = get_seed_manager()
+        save_manager(seed)
+        return seed
+    except Exception:
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         corrupted_path = DATA_DIR / f"corrupted_{stamp}.json"
-        
-        if ACCOUNT_FILE.exists():
-            os.replace(ACCOUNT_FILE, corrupted_path)
-            print(f"[OSTRZEŻENIE] Uszkodzona baza! Kwarantanna: {corrupted_path.name}")
+        if LEDGER_FILE.exists():
+            os.replace(LEDGER_FILE, corrupted_path)
+            print(f"[OSTRZEŻENIE] Kwarantanna uszkodzonej bazy: {corrupted_path.name}")
 
         backups = sorted(BACKUP_DIR.glob("transactions_*.bak"))
         if backups:
-            latest_backup = backups[-1]
-            print(f"[INFO] Odzyskiwanie bazy z kopii: {latest_backup.name}")
             try:
-                with open(latest_backup, mode="r", encoding="utf-8") as f:
-                    restored_acc = Account.from_dict(json.load(f))
-                    save_account(restored_acc)
-                    return restored_acc
+                with open(backups[-1], mode="r", encoding="utf-8") as f:
+                    restored = LedgerManager.from_dict(json.load(f))
+                    save_manager(restored)
+                    return restored
             except Exception:
-                print("[BŁĄD] Kopia zapasowa uległa uszkodzeniu!")
+                pass
 
-        seed_acc = get_seed_account()
-        save_account(seed_acc)
-        return seed_acc
+        seed = get_seed_manager()
+        save_manager(seed)
+        return seed
 
-def export_to_csv(account: Account) -> int:
+def export_to_csv(manager: LedgerManager) -> int:
     target_path = EXPORTS_DIR / "ledger_export.csv"
-    transactions = account.transactions
-    if not transactions:
+    txs = manager.transactions
+    if not txs:
         return 0
     
-    fields = ["tx_id", "category", "amount_pln", "tx_type"]
+    fields = ["tx_id", "type", "category", "amount_pln", "net_impact"]
     with open(target_path, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
-        for tx in transactions:
-            writer.writerow(tx.to_dict())
-        
-    return len(transactions)
+        for tx in txs:
+            writer.writerow({
+                "tx_id": tx.tx_id,
+                "type": tx.to_dict()["type"],
+                "category": tx.category,
+                "amount_pln": tx.amount_pln,
+                "net_impact": tx.net_balance_impact()
+            })
+    return len(txs)

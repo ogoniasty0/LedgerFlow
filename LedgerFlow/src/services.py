@@ -1,37 +1,25 @@
-from models import Account, Transaction
-from storage import save_account
+from manager import LedgerManager
+from models import ExpenseTransaction, IncomeTransaction
+from storage import save_manager
 
-def display_budget(account: Account) -> None:
-    print("\n" + "=" * 70)
-    print(f" BILANS KONTA: {account.account_name} | Saldo: {account.current_balance():.2f} PLN")
-    print("=" * 70)
-    print(f"| {'ID':<3} | {'Kategoria':<20} | {'Kwota PLN':<10} | {'Typ':<10}")
-    print("-" * 70)
-    for tx in account.transactions:
-        print(f"| {tx.tx_id:<3} | {tx.category:<20} | {tx.amount_pln:>10.2f} | {tx.tx_type:<10}")
-    print("-" * 70)
+def display_ledger(manager: LedgerManager) -> None:
+    print("\n" + "=" * 80)
+    print(f" PORTFEL: {manager.account_name} | Saldo Całkowite: {manager.calculate_total_balance():.2f} PLN")
+    print("=" * 80)
+    for tx in manager.transactions:
+        print(f"  * {tx}")
+    print("-" * 80)
 
-def add_new_transaction(account: Account, category: str, amount: float, tx_type: str) -> None:
-    existing_ids = [tx.tx_id for tx in account.transactions]
-    new_id = max(existing_ids) + 1 if existing_ids else 1
+def add_expense(manager: LedgerManager, category: str, amount: float, operator_fee: float) -> None:
+    tx_id = manager.generate_next_id()
+    tx = ExpenseTransaction(tx_id, category, amount, operator_fee)
+    manager.register_transaction(tx)
+    save_manager(manager)
+    print(f"Sukces: Dodano wydatek o ID {tx_id}.")
 
-    new_tx = Transaction(tx_id=new_id, category=category, amount_pln=amount, tx_type=tx_type)
-
-    account.register_tx(new_tx)
-
-    save_account(account)
-    print(f"Sukces: Dodano transakcję o ID {new_id}.")
-
-def filter_transactions(account: Account, target_category: str) -> None:
-    """Filtruje transakcje po kategorii w obiekcie Account."""
-    filtered = [
-        tx for tx in account.transactions 
-        if tx.category.lower() == target_category.lower()
-    ]
-    
-    print(f"\n--- WYNIKI DLA KATEGORII: '{target_category}' ---")
-    if not filtered:
-        print("Brak transakcji w tej kategorii.")
-    else:
-        temp_acc = Account(f"Filtr: {target_category}", initial_balance=0.0, transactions=filtered)
-        display_budget(temp_acc)
+def add_income(manager: LedgerManager, category: str, amount: float, source: str, tax_pct: float) -> None:
+    tx_id = manager.generate_next_id()
+    tx = IncomeTransaction(tx_id, category, amount, source, tax_pct)
+    manager.register_transaction(tx)
+    save_manager(manager)
+    print(f"Sukces: Dodano przychód o ID {tx_id}.")
