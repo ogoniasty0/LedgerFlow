@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Any, Self
+
 
 class Transaction(ABC):
 
-    def __init__(self, tx_id: int, category: str, amount_pln: float) -> None:
+    def __init__(self, tx_id: int, category: str, amount_pln: float, tx_date: str | None = None) -> None:
         self.tx_id: int = tx_id
         self.category: str = category
         self.amount_pln = amount_pln
+        self.tx_date: str = tx_date if tx_date else datetime.now().strftime("%Y-%m-%d")
 
     @property
     def amount_pln(self) -> float:
@@ -20,12 +23,20 @@ class Transaction(ABC):
             raise ValueError(f"Kwota musi być większa od zera (podano: {value}).")
         self._amount_pln = round(float(value), 2)
 
+    @property
+    @abstractmethod
+    def tx_type(self) -> str:
+        pass
+
     @abstractmethod
     def net_balance_impact(self) -> float:
         pass
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(tx_id={self.tx_id}, category={self.category!r}, amount_pln={self.amount_pln})"
+        return (
+            f"{self.__class__.__name__}(tx_id={self.tx_id}, tx_date={self.tx_date!r}, "
+            f"category={self.category!r}, amount_pln={self.amount_pln})"
+        )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Transaction):
@@ -40,6 +51,7 @@ class Transaction(ABC):
     def to_dict(self) -> dict[str, Any]:
         return {
             "tx_id": self.tx_id,
+            "tx_date": self.tx_date,
             "category": self.category,
             "amount_pln": self.amount_pln
         }
@@ -47,9 +59,20 @@ class Transaction(ABC):
 
 class ExpenseTransaction(Transaction):
 
-    def __init__(self, tx_id: int, category: str, amount_pln: float, operator_fee: float = 0.0) -> None:
-        super().__init__(tx_id, category, amount_pln)
+    def __init__(
+        self,
+        tx_id: int,
+        category: str,
+        amount_pln: float,
+        operator_fee: float = 0.0,
+        tx_date: str | None = None
+    ) -> None:
+        super().__init__(tx_id, category, amount_pln, tx_date=tx_date)
         self.operator_fee = operator_fee
+
+    @property
+    def tx_type(self) -> str:
+        return "WYDATEK"
 
     @property
     def operator_fee(self) -> float:
@@ -65,7 +88,10 @@ class ExpenseTransaction(Transaction):
         return -round(self.amount_pln + self.operator_fee, 2)
 
     def __str__(self) -> str:
-        return f"[{self.tx_id:02d}] WYDATEK | {self.category:<15} | -{(self.amount_pln + self.operator_fee):>8.2f} PLN (Prowizja: {self.operator_fee:.2f} PLN)"
+        return (
+            f"[{self.tx_id:02d}] {self.tx_date} | WYDATEK  | {self.category:<15} | "
+            f"-{(self.amount_pln + self.operator_fee):>8.2f} PLN (Prowizja: {self.operator_fee:.2f} PLN)"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
@@ -79,16 +105,29 @@ class ExpenseTransaction(Transaction):
             tx_id=int(data["tx_id"]),
             category=str(data["category"]),
             amount_pln=float(data["amount_pln"]),
-            operator_fee=float(data.get("operator_fee", 0.0))
+            operator_fee=float(data.get("operator_fee", 0.0)),
+            tx_date=data.get("tx_date")
         )
 
 
 class IncomeTransaction(Transaction):
 
-    def __init__(self, tx_id: int, category: str, amount_pln: float, source: str = "Inne", tax_pct: float = 0.0) -> None:
-        super().__init__(tx_id, category, amount_pln)
+    def __init__(
+        self,
+        tx_id: int,
+        category: str,
+        amount_pln: float,
+        source: str = "Inne",
+        tax_pct: float = 0.0,
+        tx_date: str | None = None
+    ) -> None:
+        super().__init__(tx_id, category, amount_pln, tx_date=tx_date)
         self.source: str = source
         self.tax_pct = tax_pct
+
+    @property
+    def tx_type(self) -> str:
+        return "PRZYCHOD"
 
     @property
     def tax_pct(self) -> float:
@@ -105,7 +144,10 @@ class IncomeTransaction(Transaction):
         return round(net_amount, 2)
 
     def __str__(self) -> str:
-        return f"[{self.tx_id:02d}] PRZYCHÓD | {self.category:<15} | +{self.net_balance_impact():>8.2f} PLN (Źródło: {self.source}, Podatek: {self.tax_pct}%)"
+        return (
+            f"[{self.tx_id:02d}] {self.tx_date} | PRZYCHÓD | {self.category:<15} | "
+            f"+{self.net_balance_impact():>8.2f} PLN (Źródło: {self.source}, Podatek: {self.tax_pct}%)"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
@@ -121,15 +163,16 @@ class IncomeTransaction(Transaction):
             category=str(data["category"]),
             amount_pln=float(data["amount_pln"]),
             source=str(data.get("source", "Inne")),
-            tax_pct=float(data.get("tax_pct", 0.0))
+            tax_pct=float(data.get("tax_pct", 0.0)),
+            tx_date=data.get("tx_date")
         )
-
 
 
 TRANSACTION_REGISTRY: dict[str, type[Transaction]] = {
     "expense": ExpenseTransaction,
     "income": IncomeTransaction
 }
+
 
 def deserialize_transaction(payload: dict[str, Any]) -> Transaction:
     tx_type = payload.get("type")
