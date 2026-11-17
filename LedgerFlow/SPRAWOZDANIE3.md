@@ -9,7 +9,7 @@
 ---
 
 ## 1. Cel i Zakres Inżynierski Zadania
-Zaimplementowanie encji, slowników i agregatu. 
+Zaimplementowanie encji, slowników i agregatu. W kolejnej części zostaly dodane dziedziczenie, polimorfizm bez isinstance, wzorzec menedżera i serializację. 
 ---
 
 ## 2. Architektura Rozwiązania i Struktura Modułów
@@ -68,11 +68,11 @@ Wyswietla obliczone poilmorficznie saldo w zaleznosci od konta.
 
 ## 5. Podział Pracy w Zespole
 *(Precyzyjne i uczciwe rozliczenie wkładu obu członków zespołu – weryfikowane z historią commitów `git log`).*
-* **[Imię Nazwisko Studenta 1]:**
-  * Odpowiedzialność za moduły: `src/...`
-  * Zaimplementowane funkcjonalności: [...]
-  * Liczba wykonanych commitów: [...]
-* **[Imię Nazwisko Studenta 2]:**
-  * Odpowiedzialność za moduły: `src/...`
-  * Zaimplementowane funkcjonalności: [...]
-  * Liczba wykonanych commitów: [...]
+* **Oskar Ogonek:**
+  * Odpowiedzialność za moduły: `src/manager.py, models.py, main.py`
+  * Zaimplementowane funkcjonalności: [Klasa abstrakcyjna, dziedziczenie klas w transaction]
+  * Liczba wykonanych commitów: [1]
+* **Oskar Ogonek:**
+  * Odpowiedzialność za moduły: `src/manager.py, models.py, main.py`
+  * Zaimplementowane funkcjonalności: [Klasa abstrakcyjna, dziedziczenie klas w transaction]
+  * Liczba wykonanych commitów: [1]
