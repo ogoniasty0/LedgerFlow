@@ -15,16 +15,15 @@ Zadanie ma na celu zaimplementowanie silnika SQLite, schematu DDL oraz relacji 1
 
 ## 2. Architektura Rozwiązania i Struktura Modułów
 *(Wykaz zrealizowanych plików w katalogu `src/` wraz z przypisaniem ich odpowiedzialności).*
-* `src/validators.py` – 
-* `src/services.py` – 
+* `src/validators.py` – Walidacja danych/obsluga bledow.
+* `src/services.py` – Wartswa aplikacji pośrednicząca między interfejsem a bazą danych i logiką.
 * `src/main.py` – Glówny plik wykonawczy
-* `src/database.py` – 
-* `src/manager.py` – 
-* `src/migrate.py` – 
-* `src/models.py` – 
-* `src/storage.py` – 
-* `src/__init__.py` – 
-* `src/test-database.py` – 
+* `src/database.py` – Dostęp do relacyjnej bazy danych
+* `src/manager.py` – Logika zarządzania kontem
+* `src/migrate.py` – Skrypt migracyjny
+* `src/models.py` – Klasy domenowe
+* `src/storage.py` – Zapis transakcji, eksport do CSV
+* `src/test-database.py` – Automatyczne testy wykonanych zmian
 
 
 ---
@@ -64,11 +63,11 @@ def example_function():
 
 ## 5. Podział Pracy w Zespole
 *(Precyzyjne i uczciwe rozliczenie wkładu obu członków zespołu – weryfikowane z historią commitów `git log`).*
-* **[Imię Nazwisko Studenta 1]:**
-  * Odpowiedzialność za moduły: `src/...`
-  * Zaimplementowane funkcjonalności: [...]
-  * Liczba wykonanych commitów: [...]
-* **[Imię Nazwisko Studenta 2]:**
-  * Odpowiedzialność za moduły: `src/...`
-  * Zaimplementowane funkcjonalności: [...]
-  * Liczba wykonanych commitów: [...]
+* **[Oskar Ogonek]:**
+  * Odpowiedzialność za moduły: `src/migrate.py, database.py`
+  * Zaimplementowane funkcjonalności: [Zamknięcie wszystkich zapytań w pliku database, jednorazowy transfer z JSON do SQLite.]
+  * Liczba wykonanych commitów: [1]
+* **[Karol Zegartowski]:**
+  * Odpowiedzialność za moduły: `src/models.py, storage.py, services.py`
+  * Zaimplementowane funkcjonalności: [Przelaczenie magazynu aplikacji na SQLite, metody wydatek i przychód]
+  * Liczba wykonanych commitów: [1]

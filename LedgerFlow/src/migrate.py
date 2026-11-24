@@ -19,11 +19,9 @@ def migrate_json_to_sqlite(
     try:
         repo = LedgerRepository(conn)
 
-        # a. Weryfikacja liczby rekordów w tabeli nadrzędnej
         if repo.count_accounts() > 0:
             return False
 
-        # b. Jeśli baza pusta i istnieje plik JSON -> deserializacja przez from_dict()
         if not source_json.exists():
             return False
 
@@ -32,10 +30,8 @@ def migrate_json_to_sqlite(
 
         manager = LedgerManager.from_dict(raw_data)
 
-        # c. Zapis agregatu wraz z transakcjami przez Repozytorium
         repo.save_account_with_transactions(manager)
 
-        # d. Bezpieczna archiwizacja pliku źródłowego (.json -> .json.bak)
         backup_path = source_json.with_suffix(".json.bak")
         source_json.replace(backup_path)
         print(f"Przeniesiono dane do SQLite. Archiwum JSON: {backup_path.name}")
