@@ -1,4 +1,7 @@
-tx_id,category,amount_pln,tx_type
-1,Zakupy,256.0,WYDATEK
-2,Wypłata,5000.0,PRZYCHOD
-3,Rachunki,640.0,WYDATEK
+tx_id,tx_date,type,category,amount_pln,net_impact
+1,2026-11-17,expense,Zakupy Spozywcze,150.0,-152.5
+2,2026-11-17,income,Wyplata,4000.0,3520.0
+3,2026-11-17,expense,zakupy,24.0,-24.0
+4,2026-11-17,expense,Dentysta,740.0,-740.0
+5,2026-11-17,income,Praca dorywcza,1200.0,924.0
+6,2026-11-24,expense,Rozrywka,322.0,-322.0

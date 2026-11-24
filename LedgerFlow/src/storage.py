@@ -1,5 +1,6 @@
 import csv
 from pathlib import Path
+from typing import Any
 
 from database import DEFAULT_DB_PATH, LedgerRepository, get_connection
 from manager import LedgerManager
@@ -23,7 +24,6 @@ def get_seed_manager() -> LedgerManager:
 
 
 def load_manager() -> LedgerManager:
-    # Automatyczna, idempotentna migracja ze starego pliku JSON (jeśli istnieje)
     migrate_json_to_sqlite(db_path=DEFAULT_DB_PATH, json_path=LEDGER_FILE)
 
     conn = get_connection(DEFAULT_DB_PATH)
@@ -44,6 +44,7 @@ def load_manager() -> LedgerManager:
 
 
 def persist_new_transaction(tx: Transaction) -> int:
+    """Zapisuje pojedynczą nową transakcję do domyślnego konta w bazie SQLite."""
     conn = get_connection(DEFAULT_DB_PATH)
     try:
         repo = LedgerRepository(conn)
@@ -51,6 +52,72 @@ def persist_new_transaction(tx: Transaction) -> int:
         if account_id is None:
             raise RuntimeError("Brak konta nadrzędnego w bazie danych.")
         return repo.add_transaction(account_id, tx)
+    finally:
+        conn.close()
+
+
+def create_secondary_account(account_name: str, initial_balance_pln: float = 0.0) -> int:
+    conn = get_connection(DEFAULT_DB_PATH)
+    try:
+        repo = LedgerRepository(conn)
+        return repo.create_account(account_name, initial_balance_pln)
+    finally:
+        conn.close()
+
+
+def query_transactions(
+    category_phrase: str = "",
+    tx_type: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    min_amount: float = 0.0,
+    sort_by: str = "tx_date",
+    sort_dir: str = "DESC",
+) -> list[dict[str, Any]]:
+    conn = get_connection(DEFAULT_DB_PATH)
+    try:
+        repo = LedgerRepository(conn)
+        return repo.search_transactions(
+            category_phrase=category_phrase,
+            tx_type=tx_type,
+            date_from=date_from,
+            date_to=date_to,
+            min_amount=min_amount,
+            sort_by=sort_by,
+            sort_dir=sort_dir,
+        )
+    finally:
+        conn.close()
+
+
+def fetch_accounts_balance_report(min_balance: float = 0.0) -> list[dict[str, Any]]:
+    conn = get_connection(DEFAULT_DB_PATH)
+    try:
+        repo = LedgerRepository(conn)
+        return repo.get_accounts_balance_report(min_balance=min_balance)
+    finally:
+        conn.close()
+
+
+def fetch_expenses_by_category(min_spent: float = 0.0) -> list[dict[str, Any]]:
+    conn = get_connection(DEFAULT_DB_PATH)
+    try:
+        repo = LedgerRepository(conn)
+        return repo.get_expenses_by_category(min_spent=min_spent)
+    finally:
+        conn.close()
+
+
+def execute_account_transfer(
+    from_account_id: int,
+    to_account_id: int,
+    amount_pln: float,
+    category: str = "Przelew wewnętrzny",
+) -> tuple[int, int]:
+    conn = get_connection(DEFAULT_DB_PATH)
+    try:
+        repo = LedgerRepository(conn)
+        return repo.transfer_funds(from_account_id, to_account_id, amount_pln, category=category)
     finally:
         conn.close()
 
@@ -72,6 +139,6 @@ def export_to_csv(manager: LedgerManager) -> int:
                 "type": tx.to_dict()["type"],
                 "category": tx.category,
                 "amount_pln": tx.amount_pln,
-                "net_impact": tx.net_balance_impact()
+                "net_impact": tx.net_balance_impact(),
             })
     return len(txs)
